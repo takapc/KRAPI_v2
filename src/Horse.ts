@@ -1,4 +1,4 @@
-interface Horse {
+export interface Horse {
     id: number;
     code: string;
     color: number;
