@@ -57,4 +57,28 @@ app.get("/horses/search", (req: express.Request, res: express.Response) => {
     });
 });
 
+app.get("/races", (_, res: express.Response) => {
+    const query = "SELECT * FROM races;";
+    connection.query(query, (err, result) => {
+        if (err) {
+            console.log(err);
+            res.status(500).send("Error retrieving data from database");
+        } else {
+            res.status(200).json(result);
+        }
+    });
+});
+
+app.get("/races/id/:id", (req: express.Request, res: express.Response) => {
+    const query = `SELECT * FROM races where id = "` + req.params.id + `";`;
+    connection.query(query, (err, result) => {
+        if (err) {
+            console.log(err);
+            res.status(500).send("Error retrieving data from database");
+        } else {
+            res.status(200).json(result);
+        }
+    });
+});
+
 app.listen(3001, () => console.log("Server is running"));
