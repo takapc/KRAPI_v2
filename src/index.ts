@@ -1,13 +1,24 @@
 import express from "express";
+import expressBasicAuth from "express-basic-auth";
 import mysql from "mysql2";
 import * as dotenv from "dotenv";
 import { Horse } from "./Horse";
 
 dotenv.config();
 
+const password = process.env.DB_PASS || "Fuck";
+
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.use(
+    expressBasicAuth({
+        users: {
+            kradmin: password,
+        },
+    })
+);
 
 const connection = mysql.createConnection({
     user: process.env.DB_USER,
@@ -71,6 +82,19 @@ app.get("/races", (_, res: express.Response) => {
 
 app.get("/races/id/:id", (req: express.Request, res: express.Response) => {
     const query = `SELECT * FROM races where id = "` + req.params.id + `";`;
+    connection.query(query, (err, result) => {
+        if (err) {
+            console.log(err);
+            res.status(500).send("Error retrieving data from database");
+        } else {
+            res.status(200).json(result);
+        }
+    });
+});
+
+app.get("/races/search", (req: express.Request, res: express.Response) => {
+    const query =
+        `SELECT * FROM races where name like "%` + req.query.name + `%"`;
     connection.query(query, (err, result) => {
         if (err) {
             console.log(err);

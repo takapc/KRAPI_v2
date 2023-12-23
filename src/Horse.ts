@@ -12,4 +12,13 @@ export interface Horse {
     apts: number;
     rate: number;
     belong: string;
+    birth: number;
+    age: number;
+    sex: HorseSex;
+}
+
+enum HorseSex {
+    "牡",
+    "牝",
+    "騙",
 }
