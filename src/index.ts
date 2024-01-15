@@ -2,7 +2,7 @@ import express from "express";
 import expressBasicAuth from "express-basic-auth";
 import mysql from "mysql2";
 import * as dotenv from "dotenv";
-import { Horse } from "./Horse";
+import { Horse, Race } from "./Horse";
 
 dotenv.config();
 
@@ -91,6 +91,37 @@ app.get("/races/id/:id", (req: express.Request, res: express.Response) => {
         }
     });
 });
+
+app.get(
+    "/races/id/:id/horses",
+    (req: express.Request, res: express.Response) => {
+        const query = `SELECT * FROM races where id = "` + req.params.id + `";`;
+        connection.query(query, (err, result: Race[]) => {
+            if (err) {
+                console.log(err);
+                res.status(500).send("Error retrieving data from database");
+            } else {
+                const horse_code = result[0].code
+                    .substring(3, 39)
+                    .match(/.{3}/g)
+                    ?.join(", ");
+                console.log(horse_code);
+                const query2 =
+                    `SELECT * FROM horse WHERE id in (` + horse_code + `);`;
+                connection.query(query2, (err, result2) => {
+                    if (err) {
+                        console.log(err);
+                        res.status(500).send(
+                            "Error retrieving data from database"
+                        );
+                    } else {
+                        res.status(200).json(result2);
+                    }
+                });
+            }
+        });
+    }
+);
 
 app.get("/races/search", (req: express.Request, res: express.Response) => {
     const query =
