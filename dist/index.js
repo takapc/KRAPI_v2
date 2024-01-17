@@ -30,11 +30,13 @@ const express_1 = __importDefault(require("express"));
 const express_basic_auth_1 = __importDefault(require("express-basic-auth"));
 const mysql2_1 = __importDefault(require("mysql2"));
 const dotenv = __importStar(require("dotenv"));
+const cors = require("cors");
 dotenv.config();
 const password = process.env.DB_PASS || "Fuck";
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
+app.use(cors());
 app.use((0, express_basic_auth_1.default)({
     users: {
         kradmin: password,
@@ -47,7 +49,6 @@ const connection = mysql2_1.default.createConnection({
     database: process.env.DB_DATABASE,
     port: 3306,
 });
-console.log(process.env.DB_USER);
 app.get("/horses", (_, res) => {
     const query = "SELECT * FROM horse;";
     connection.query(query, (err, result) => {
@@ -111,6 +112,32 @@ app.get("/races/id/:id", (req, res) => {
         }
         else {
             res.status(200).json(result);
+        }
+    });
+});
+app.get("/races/id/:id/horses", (req, res) => {
+    const query = `SELECT * FROM races where id = "` + req.params.id + `";`;
+    connection.query(query, (err, result) => {
+        var _a;
+        if (err) {
+            console.log(err);
+            res.status(500).send("Error retrieving data from database");
+        }
+        else {
+            const horse_code = (_a = result[0].code
+                .substring(3, 39)
+                .match(/.{3}/g)) === null || _a === void 0 ? void 0 : _a.join(", ");
+            console.log(horse_code);
+            const query2 = `SELECT * FROM horse WHERE id in (` + horse_code + `);`;
+            connection.query(query2, (err, result2) => {
+                if (err) {
+                    console.log(err);
+                    res.status(500).send("Error retrieving data from database");
+                }
+                else {
+                    res.status(200).json(result2);
+                }
+            });
         }
     });
 });

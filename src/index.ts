@@ -3,6 +3,8 @@ import expressBasicAuth from "express-basic-auth";
 import mysql from "mysql2";
 import * as dotenv from "dotenv";
 import { Horse, Race } from "./Horse";
+const cors = require("cors")
+
 
 dotenv.config();
 
@@ -11,6 +13,8 @@ const password = process.env.DB_PASS || "Fuck";
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.use(cors())
 
 app.use(
     expressBasicAuth({
@@ -42,7 +46,7 @@ app.get("/horses", (_, res: express.Response) => {
 
 app.get("/horses/id/:id", (req: express.Request, res: express.Response) => {
     const query = `SELECT * FROM horse WHERE ID = ${req.params.id};`;
-    connection.query(query, (err, result: Horse[]) => {
+    connection.query(query, (err: any, result: Horse[]) => {
         if (err) {
             console.log(err);
             res.status(500).send("Error retrieving data from database");
@@ -58,7 +62,7 @@ app.get("/horses/search", (req: express.Request, res: express.Response) => {
     if (req.query.belong) query += `and belong = "` + req.query.belong + `"`;
     if (req.query.owner) query += `and owner = "` + req.query.owner + `"`;
     if (req.query.color) query += `and color = "` + req.query.color + `"`;
-    connection.query(query, (err, result: Horse[]) => {
+    connection.query(query, (err: any, result: Horse[]) => {
         if (err) {
             console.log(err);
             res.status(500).send("Error retrieving data from database");
@@ -96,7 +100,7 @@ app.get(
     "/races/id/:id/horses",
     (req: express.Request, res: express.Response) => {
         const query = `SELECT * FROM races where id = "` + req.params.id + `";`;
-        connection.query(query, (err, result: Race[]) => {
+        connection.query(query, (err: any, result: Race[]) => {
             if (err) {
                 console.log(err);
                 res.status(500).send("Error retrieving data from database");
